@@ -29,4 +29,10 @@ export default class UserAccount {
       amount: this.#amount,
     };
   }
+
+  displayUserAccountData() {
+    console.log(
+      `UID: ${this.#uid}\nEmail: ${this.#email}\nPassword: ${this.#password}\nAmount: ${this.#amount}\n`,
+    );
+  }
 }

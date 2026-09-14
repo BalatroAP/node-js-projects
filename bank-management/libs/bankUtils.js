@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import UserAccount from "../models/UserAccount.js";
 
 export function getClient(uri) {
   return new MongoClient(uri);
@@ -21,8 +22,8 @@ export async function createNewCollection(
 }
 
 export async function insertNewUserAccount(
-  UserAccount,
   client,
+  UserAccount,
   databaseName,
   collectionName,
 ) {
@@ -39,7 +40,7 @@ export async function insertNewUserAccount(
   }
 }
 
-export async function checkIfUserAccountExist(email, client) {
+export async function checkIfUserAccountExist(client, email) {
   let flag = false;
   try {
     await client.connect();
@@ -57,5 +58,46 @@ export async function checkIfUserAccountExist(email, client) {
   } finally {
     await client.close();
     return flag;
+  }
+}
+
+export async function getAllUserAccounts(client) {
+  let userAccounts = [];
+
+  try {
+    await client.connect();
+    const userAccCollection = client.db("bank").collection("test");
+    const userCursor = userAccCollection.find();
+
+    for await (const userAcc of userCursor) {
+      userAccounts.push(
+        new UserAccount(
+          userAcc.email,
+          userAcc.password,
+          userAcc.amount,
+          userAcc._id,
+        ),
+      );
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    await client.close();
+    return userAccounts;
+  }
+}
+
+export async function updateUserAccountAmount(client, email, amount) {
+  try {
+    await client.connect();
+    const userAccCollection = await client.db("bank").collection("test");
+    await userAccCollection.updateOne(
+      { email: email },
+      { $set: { amount: amount } },
+    );
+  } catch (err) {
+    console.error(err);
+  } finally {
+    await client.close();
   }
 }
