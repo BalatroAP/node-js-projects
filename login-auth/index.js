@@ -27,27 +27,37 @@ function main() {
     res.sendFile(path.join(workingDir, "/views/signup.html"));
   });
 
-  app.post("/login", (req, res) => {
+  app.post("/login", async (req, res) => {
+    await mongoose.connect(credentials.uri, { dbName: "auth-login" });
     const username = req.body.username;
     const password = req.body.password;
-    console.log(username, password);
+
+    const userSchema = mongoose.model("users", User);
+    let userDbPassword = await userSchema.findOne(
+      { username: username },
+      "password",
+    );
+
+    bcrypt.compare(password, userDbPassword.password, (err, hash) => {
+      console.log(hash);
+    });
   });
 
   app.post("/signup", async (req, res) => {
-    await mongoose.connect(credentials.uri);
+    await mongoose.connect(credentials.uri, { dbName: "auth-login" });
 
     bcrypt.hash(req.body.password, 8, async (err, hashedPassword) => {
       if (err) {
         return err;
       }
 
-      const userSchema = mongoose.model("test", User);
+      const userSchema = mongoose.model("users", User);
       const newUser = new userSchema({
         username: req.body.username,
         password: hashedPassword,
       });
 
-      await newUser.save();
+      await newUser.save().finally(console.log("[LOGGED] USER SAVED"));
     });
   });
 
