@@ -1,3 +1,6 @@
+import mongoose from "mongoose";
+const ObjectId = mongoose.Types.ObjectId;
+
 let movies;
 
 export default class MoviesDAO {
@@ -6,8 +9,8 @@ export default class MoviesDAO {
       return;
     }
 
-    movies = conn.collection("movies");
     try {
+      movies = await conn.collection("movies");
     } catch (err) {
       console.error(err);
     }
@@ -39,6 +42,42 @@ export default class MoviesDAO {
     } catch (err) {
       console.error(`Unable to issue find command, ${e}`);
       return { moviesList: [], totalNumMovies: 0 };
+    }
+  }
+
+  static async getRatings() {
+    let ratings = [];
+    try {
+      ratings = await movies.distinct("rated");
+      return ratings;
+    } catch (err) {
+      console.error(`unable to get ratings, ${err}`);
+      return ratings;
+    }
+  }
+
+  static async getMoviesById(id) {
+    try {
+      return await movies
+        .aggregate([
+          {
+            $match: {
+              _id: new ObjectId(id),
+            },
+          },
+          {
+            $lookup: {
+              from: "reviews",
+              localField: "_id",
+              foreignField: "movie_id",
+              as: "reviews",
+            },
+          },
+        ])
+        .next();
+    } catch (err) {
+      console.error(`something went wrong in getMovieById: ${err}`);
+      throw err;
     }
   }
 }
