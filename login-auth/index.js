@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import User from "./Schema/User.js";
+import User from "./schema/User.js";
 import bcrypt from "bcryptjs";
 import credentials from "../private.json" with { type: "json" };
 
