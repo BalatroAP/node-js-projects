@@ -44,7 +44,7 @@ export default class MoviesController {
       res.json(movie);
     } catch (err) {
       console.log(`Api: ${err}`);
-      res.status(500).json({ error: e });
+      res.status(500).json({ error: err });
     }
   }
 

@@ -40,7 +40,7 @@ export default class MoviesDAO {
       const totalNumMovies = await movies.countDocuments(query);
       return { moviesList, totalNumMovies };
     } catch (err) {
-      console.error(`Unable to issue find command, ${e}`);
+      console.error(`Unable to issue find command, ${err}`);
       return { moviesList: [], totalNumMovies: 0 };
     }
   }
